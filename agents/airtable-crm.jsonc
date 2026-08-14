@@ -1,0 +1,80 @@
+// Integration: Airtable, looking up the caller and logging the call.
+//
+// Needs AIRTABLE_API_KEY (https://airtable.com/create/tokens, scopes
+// data.records:read + data.records:write) and AIRTABLE_BASE_ID, the app…
+// segment of your base URL.
+//
+// Expects tables Customers (Name, Phone, Plan) and Calls (Customer, Summary,
+// Follow up). Rename them in the URLs below to match your base.
+{
+  "name": "Airtable CRM showcase",
+
+  "system_prompt": "You answer the phone for Northwind, a small software company. Start by asking who is calling and get their phone number, then use find_customer to look them up before anything else. If you find them, greet them by name and mention their plan. If you don't, treat them as new and take their details. Answer what you can from their record. Before the call ends, always use log_call to write down what it was about and whether someone needs to follow up. Keep replies to one or two sentences. Read phone numbers back digit by digit. Never invent anything that wasn't in the record.",
+
+  "greeting": "Northwind, this is the front desk. Who am I speaking with?",
+
+  "voice": { "voice_id": "mary" },
+
+  "input": {
+    "keyterms": ["Northwind"]
+  },
+
+  "tools": [
+    {
+      "name": "find_customer",
+      "description": "Look up a caller in the CRM by phone number. Call this as soon as you have their number, before answering account questions.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filterByFormula": {
+            "type": "string",
+            "description": "Airtable formula matching the caller, exactly like {Phone}=\"+15551234567\". Always use this format with the number in E.164."
+          },
+          "maxRecords": {
+            "type": "number",
+            "description": "How many records to return. Use 1."
+          }
+        },
+        "required": ["filterByFormula"]
+      },
+      "execution_mode": "hold",
+      "timeout_seconds": 15,
+      "http": {
+        // GET puts the arguments in the query string, which is how Airtable's
+        // list endpoint takes filters. ${AIRTABLE_BASE_ID} is filled in from
+        // .env at publish time.
+        "url": "https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/Customers",
+        "http_method": "GET",
+        "headers": [{ "name": "Authorization", "value": "Bearer ${AIRTABLE_API_KEY}" }]
+      }
+    },
+    {
+      "name": "log_call",
+      "description": "Write a record of this call to the CRM. Call once, near the end of the conversation, with a one-line summary.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          // POST sends these arguments as the JSON body, and Airtable's
+          // create-record endpoint wants everything nested under "fields".
+          "fields": {
+            "type": "object",
+            "properties": {
+              "Customer": { "type": "string", "description": "Caller name." },
+              "Summary": { "type": "string", "description": "One line on what the call was about." },
+              "Follow up": { "type": "boolean", "description": "True if a person needs to call them back." }
+            },
+            "required": ["Customer", "Summary"]
+          }
+        },
+        "required": ["fields"]
+      },
+      "execution_mode": "interactive",
+      "timeout_seconds": 15,
+      "http": {
+        "url": "https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/Calls",
+        "http_method": "POST",
+        "headers": [{ "name": "Authorization", "value": "Bearer ${AIRTABLE_API_KEY}" }]
+      }
+    }
+  ]
+}

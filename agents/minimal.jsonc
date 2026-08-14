@@ -1,0 +1,25 @@
+// The smallest agent worth running. Three required fields and a greeting.
+//
+// Everything you leave out has a default: a managed model, 24 kHz PCM both
+// ways, adaptive turn detection, interruptions. The other files here each
+// take one of those defaults and put it in your hands.
+//
+// https://www.assemblyai.com/docs/voice-agents/voice-agent-api/create-agent
+{
+  // Shown in the AssemblyAI dashboard. Safe to rename: the agent is tracked
+  // by the AGENT_ID in your .env, not by this.
+  "name": "Minimal agent",
+
+  // Who the agent is and what it may say. Voice-first: short spoken
+  // sentences, no bullet points, no formatting read aloud.
+  // https://www.assemblyai.com/docs/voice-agents/voice-agent-api/prompting-guide
+  "system_prompt": "You are a friendly assistant on a voice call. Keep every reply to one or two short sentences. Answer what was asked, lead with the answer, and skip the preamble. If you don't know something, say so. No exclamation marks.",
+
+  // Voice catalog: https://www.assemblyai.com/docs/voice-agents/voice-agent-api/voices
+  "voice": { "voice_id": "anna" },
+
+  // The one optional field worth setting every time. Without it the agent
+  // says nothing when the call connects, and silence reads as a broken line.
+  // https://www.assemblyai.com/docs/voice-agents/voice-agent-api/greeting
+  "greeting": "Hey, what can I do for you?"
+}

@@ -1,0 +1,96 @@
+// Showcase: DTMF, collecting keypad input instead of speech. Phone only,
+// since a browser tab has no keypad.
+//
+// The caller types the digits rather than saying them, and "sensitive": true
+// keeps them out of the transcript, the logs and the model while your endpoint
+// still receives the real values. That is what lets a card payment stay inside
+// PCI compliance. The same applies to account numbers, PINs, and anything else
+// you would rather not have in a recording.
+//
+// Needs DTMF_WEBHOOK_URL: your https endpoint. Point it at
+// https://webhook.site/… first to watch the payload land.
+//
+// https://www.assemblyai.com/docs/voice-agents/voice-agent-api/twilio-own-number
+{
+  "name": "DTMF showcase",
+
+  "system_prompt": "You are an Acme agent on a recorded call about an eighty three dollar and ten cent balance. One short sentence per reply.\nAfter the greeting say: \"Our records show a balance of eighty three dollars and ten cents, would you like to settle it by card now?\"\nWhen the caller agrees, call process_payment ONCE with amount \"83.10\". The card number, expiry and authorization are entered on the phone keypad. Never ask for them by voice, and never repeat digits back.\nIf the result is approved, say \"Your payment is approved.\" then ask what email address the receipt should go to. When they give one, call send_receipt with that email and amount \"83.10\", then thank them and say the receipt is on its way.\nIf it is not approved, apologise and say the payment was not completed. Call each tool at most once.",
+
+  "greeting": "Hello, this is Riley from Acme on a recorded line about your account.",
+
+  "voice": { "voice_id": "eve" },
+
+  "tools": [
+    {
+      "name": "process_payment",
+      "description": "Charge the caller's card. Card number, expiry and authorization come from the telephone keypad.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "card_number": { "type": "string", "description": "Card number from the keypad." },
+          "expiry": { "type": "string", "description": "Expiry MMYY from the keypad." },
+          "amount": { "type": "string", "description": "Amount to charge, e.g. 83.10." },
+          "authorization": { "type": "string", "description": "1 authorizes the charge." }
+        },
+        "required": ["card_number", "expiry", "amount"]
+      },
+      // Each entry takes over one parameter: instead of the model filling it
+      // in from speech, the agent reads the prompt out loud and collects
+      // digits from the keypad.
+      "dtmf_collected_arguments": [
+        {
+          "parameter_name": "card_number",
+          "min_digits": 13,
+          "max_digits": 19,
+          // Kept out of the transcript, the logs, and the model.
+          "sensitive": true,
+          // The key that means "done".
+          "terminator": "#",
+          // Reads it back and asks for 1 to confirm, 2 to try again.
+          "confirm": true,
+          "prompt": "Using your keypad, please enter your card number, then press hash."
+        },
+        {
+          "parameter_name": "expiry",
+          "min_digits": 4,
+          "max_digits": 4,
+          "sensitive": true,
+          "terminator": "#",
+          "confirm": false,
+          "prompt": "Now enter the expiry as four digits, month then year."
+        },
+        {
+          "parameter_name": "authorization",
+          "min_digits": 1,
+          "max_digits": 1,
+          "sensitive": false,
+          "terminator": "#",
+          "confirm": false,
+          "prompt": "Do you authorize Acme to process a one-time payment of eighty three dollars and ten cents today? Press 1 to authorize, or 2 to cancel."
+        }
+      ],
+      "http": {
+        // Your endpoint, which holds the Stripe secret key and creates the
+        // charge. The agent never touches Stripe directly.
+        "url": "${DTMF_WEBHOOK_URL}",
+        "http_method": "POST"
+      }
+    },
+    {
+      "name": "send_receipt",
+      "description": "Email a payment receipt after the payment is approved.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "description": "Caller's email address." },
+          "amount": { "type": "string", "description": "Amount charged." }
+        },
+        "required": ["email", "amount"]
+      },
+      "http": {
+        "url": "${DTMF_WEBHOOK_URL}",
+        "http_method": "POST"
+      }
+    }
+  ]
+}

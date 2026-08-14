@@ -1,0 +1,41 @@
+// Showcase: turn detection, which decides when the agent starts talking.
+//
+// This is the difference between an agent that feels alive and one that talks
+// over you. Every number below is a default made explicit, so you can feel
+// what changing it does.
+//
+// Try it: pause mid-sentence and see if it jumps in. Then raise min_silence
+// to 1800, publish again, and try the same pause.
+//
+// https://www.assemblyai.com/docs/voice-agents/voice-agent-api/turn-detection-and-interruptions
+{
+  "name": "Turn taking showcase",
+
+  "system_prompt": "You are a phone screener for Lumen Labs, talking to applicants for a customer support role. Ask these questions in order, one per turn. First, tell me about your customer support experience. Second, describe a time you turned around an unhappy customer. Third, what is your availability and earliest start date? Keep it conversational and brief. Let people finish their thought before you respond, and never restate their answer back at them. If they ask you something, answer it and pick up where you left off.",
+
+  "greeting": "Hi, thanks for making time to talk about the customer support role. Ready when you are.",
+
+  "voice": { "voice_id": "george" },
+
+  "input": {
+    "turn_detection": {
+      // How sure it has to be that the noise is speech, 0 to 1. Raise it in
+      // a loud room so background chatter stops counting as a turn.
+      "vad_threshold": 0.5,
+
+      // Milliseconds of quiet before a pause counts as "your turn is over".
+      // Short feels snappy and interrupts thinkers; long feels patient and
+      // adds lag. An interview agent wants this higher than a drive-thru.
+      "min_silence": 1000,
+
+      // The upper bound: it will not wait longer than this to reply, even
+      // mid-thought.
+      "max_silence": 3000,
+
+      // Whether talking over the agent stops it mid-sentence. Leave it true
+      // for anything conversational; set false for a disclaimer that has to
+      // be read out in full.
+      "interrupt_response": true
+    }
+  }
+}

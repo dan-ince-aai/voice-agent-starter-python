@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: voice-agent
+    runtime: python
+    plan: free
+    buildCommand: 'true'
+    startCommand: python deployment/browser/server.py
+    envVars:
+      # sync: false is what makes Render prompt for a value during Blueprint
+      # creation. Everything below with a literal value is set for you and can
+      # be changed afterwards under Environment on the service.
+      - key: ASSEMBLYAI_API_KEY
+        sync: false
+      # Which agents/<name>.jsonc the service publishes on boot.
+      - key: AGENT
+        value: minimal
+      # Paste the AGENT_ID from your .env here to connect to an agent you have
+      # already published. Left empty, the service publishes AGENT itself and
+      # reuses the agent of the same name on later restarts.
+      - key: AGENT_ID
+        value: ''

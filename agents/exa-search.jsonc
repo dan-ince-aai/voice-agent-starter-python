@@ -1,0 +1,45 @@
+// Integration: Exa, for web search during a call.
+//
+// Needs EXA_API_KEY (https://dashboard.exa.ai). The ${EXA_API_KEY} below is
+// filled in at publish time, so the key never lands in this file or in git.
+//
+// Try it: ask what happened in the news this week.
+{
+  "name": "Exa search showcase",
+
+  "system_prompt": "You are a briefing assistant on a voice call. Use search_web for anything current: news, prices, releases, who someone is, what a company does. Read the results and answer in one or two spoken sentences, leading with the answer. Never read out URLs, never say you searched, and never list results one by one. Say the thing you learned. If the results don't cover it, say you couldn't find anything solid. No exclamation marks.",
+
+  "greeting": "Hey, ask me what's going on with anything and I'll check.",
+
+  "voice": { "voice_id": "eve" },
+
+  "tools": [
+    {
+      "name": "search_web",
+      "description": "Search the live web for current information: news, events, companies, people, prices. Use it whenever the answer could have changed recently.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "What to search for, phrased as a search query rather than a question."
+          },
+          "numResults": {
+            "type": "number",
+            "description": "How many results to return. Use 3 unless more depth is needed."
+          }
+        },
+        "required": ["query"]
+      },
+      "execution_mode": "hold",
+      "timeout_seconds": 20,
+      "http": {
+        "url": "https://api.exa.ai/search",
+        // POST sends the tool's arguments as the JSON body, which is exactly
+        // the shape Exa's search endpoint expects.
+        "http_method": "POST",
+        "headers": [{ "name": "x-api-key", "value": "${EXA_API_KEY}" }]
+      }
+    }
+  ]
+}

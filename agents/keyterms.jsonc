@@ -1,0 +1,33 @@
+// Showcase: keyterms, which bias transcription toward words you expect.
+//
+// Drug names, SKUs and surnames are what a transcriber guesses at, and a
+// wrong guess becomes a wrong answer. keyterms tells it what to expect.
+//
+// Try it: ask to refill your hydrochlorothiazide. Then delete the list,
+// publish again, and ask a second time.
+//
+// https://www.assemblyai.com/docs/voice-agents/voice-agent-api/transcription-prompt
+{
+  "name": "Keyterms showcase",
+
+  "system_prompt": "You answer the phone for Sunrise Pharmacy. You handle three things: prescription status checks, refill requests, and pickup times. Keep replies to one or two sentences. Hours: Monday to Saturday, 9am to 7pm. For a refill, collect the medication name and the caller's name and phone number, and always confirm the medication back so it's heard correctly. You are not a pharmacist: never give medical advice, dosing guidance, or interaction information. For any clinical question, say a pharmacist will call them back within the hour and take their name and number. Read phone numbers back digit by digit.",
+
+  "greeting": "Sunrise Pharmacy. Are you calling about a refill or a pickup?",
+
+  "voice": { "voice_id": "michael" },
+
+  "input": {
+    // The whole point of this file. Every word here is one the transcriber
+    // would otherwise have to guess at. Put your own vocabulary in: brand
+    // names, medications, part numbers, the names of your staff.
+    "keyterms": [
+      "Sunrise Pharmacy",
+      "amoxicillin",
+      "metformin",
+      "lisinopril",
+      "atorvastatin",
+      "omeprazole",
+      "hydrochlorothiazide"
+    ]
+  }
+}

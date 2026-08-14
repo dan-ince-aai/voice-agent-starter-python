@@ -1,0 +1,88 @@
+// Integration: Cal.com, booking a real slot in a real calendar.
+//
+// Needs CAL_API_KEY (https://app.cal.com/settings/developer/api-keys) and
+// CAL_EVENT_TYPE_ID, the number in the event type's URL.
+//
+// Cal.com pins v2 endpoints with the cal-api-version header. If a call 400s,
+// check https://cal.com/docs/api-reference/v2/introduction for current values.
+//
+// Try it: what's free tomorrow afternoon, then book one.
+{
+  "name": "Cal.com booking showcase",
+
+  "system_prompt": "You book appointments over the phone. Work in the caller's timezone and today's date. When they ask about a time, use get_slots to check what is actually free before you offer anything, then offer at most two options out loud. To book, you need their full name, email, and the slot they picked: collect them one at a time, read the email back to confirm you have it right, then use book_slot. Confirm the booking with the day, date and time in plain speech. Never offer a slot you have not checked, and never say the word calendar API. Keep replies to one or two sentences.",
+
+  "greeting": "Hi, I can get you booked in. What day were you thinking?",
+
+  "voice": { "voice_id": "jane" },
+
+  "tools": [
+    {
+      "name": "get_slots",
+      "description": "Check which appointment slots are actually free in a date range. Call before offering any time to the caller.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "eventTypeId": {
+            "type": "number",
+            "description": "The event type being booked. Always ${CAL_EVENT_TYPE_ID}."
+          },
+          "start": { "type": "string", "description": "Range start as YYYY-MM-DD." },
+          "end": { "type": "string", "description": "Range end as YYYY-MM-DD." },
+          "timeZone": {
+            "type": "string",
+            "description": "IANA timezone for the caller, e.g. America/New_York."
+          }
+        },
+        "required": ["eventTypeId", "start", "end", "timeZone"]
+      },
+      "execution_mode": "hold",
+      "timeout_seconds": 20,
+      "http": {
+        "url": "https://api.cal.com/v2/slots",
+        "http_method": "GET",
+        "headers": [
+          { "name": "Authorization", "value": "Bearer ${CAL_API_KEY}" },
+          { "name": "cal-api-version", "value": "2024-09-04" }
+        ]
+      }
+    },
+    {
+      "name": "book_slot",
+      "description": "Book a slot the caller has chosen and confirmed. Call once, after you have their name, email, and the exact slot.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "description": "Slot start in UTC ISO 8601, e.g. 2026-08-20T15:00:00Z. Use a start time get_slots actually returned."
+          },
+          "eventTypeId": {
+            "type": "number",
+            "description": "The event type being booked. Always ${CAL_EVENT_TYPE_ID}."
+          },
+          "attendee": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Caller full name." },
+              "email": { "type": "string", "description": "Caller email, confirmed back to them." },
+              "timeZone": { "type": "string", "description": "IANA timezone for the caller." }
+            },
+            "required": ["name", "email", "timeZone"]
+          }
+        },
+        "required": ["start", "eventTypeId", "attendee"]
+      },
+      "execution_mode": "hold",
+      "timeout_seconds": 20,
+      "http": {
+        "url": "https://api.cal.com/v2/bookings",
+        "http_method": "POST",
+        "headers": [
+          { "name": "Authorization", "value": "Bearer ${CAL_API_KEY}" },
+          { "name": "cal-api-version", "value": "2024-08-13" }
+        ]
+      }
+    }
+  ]
+}

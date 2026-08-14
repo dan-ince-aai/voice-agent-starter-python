@@ -1,0 +1,40 @@
+// Showcase: bring your own model.
+//
+// Leave "llm" out and you get AssemblyAI's managed model. Set it and you pick
+// the model: the AssemblyAI gateway (one key, one bill), or any
+// OpenAI-compatible endpoint that streams /chat/completions.
+//
+// https://www.assemblyai.com/docs/voice-agents/voice-agent-api/connect-your-own-llm
+{
+  "name": "BYO LLM showcase",
+
+  "system_prompt": "You are a thoughtful assistant on a voice call. Keep replies to one or two spoken sentences, but do the thinking before you answer: if a question has a catch, catch it. Say plainly when something is uncertain. No exclamation marks, no filler openers.",
+
+  "greeting": "Hey, I'm running on a model you picked. Ask me something with a bit of bite.",
+
+  "voice": { "voice_id": "paul" },
+
+  // One entry only, no fallback chains yet. api_key is write-only: the API
+  // encrypts it and never reads it back. ${VARS} come from your .env, so
+  // this file stays safe to commit.
+  "llm": [
+    {
+      // The AssemblyAI gateway bills the model to your existing account, so
+      // your AssemblyAI key is the only credential you need. EU accounts:
+      // https://llm-gateway.eu.assemblyai.com/v1
+      "base_url": "https://llm-gateway.assemblyai.com/v1",
+      "model": "claude-sonnet-4-6",
+      "api_key": "${ASSEMBLYAI_API_KEY}"
+    }
+  ]
+
+  // Or point it at anything that speaks the OpenAI schema: your own
+  // fine-tune, a self-hosted model, another provider.
+  // "llm": [
+  //   {
+  //     "base_url": "https://your-endpoint.example.com/v1",
+  //     "model": "your-model",
+  //     "api_key": "${YOUR_LLM_API_KEY}"
+  //   }
+  // ]
+}

@@ -1,0 +1,70 @@
+// Showcase: http tools, which let the agent call an API mid-conversation.
+//
+// AssemblyAI makes the request, so these work in a browser tab and on a phone
+// call alike. Arguments become the query string on GET, the JSON body on POST.
+// Both endpoints here are free and public: no keys needed.
+//
+// Try it: who was Ada Lovelace, then what's the weather in Tokyo.
+//
+// https://www.assemblyai.com/docs/voice-agents/voice-agent-api/tools/http-tools
+{
+  "name": "HTTP tools showcase",
+
+  "system_prompt": "You are a research assistant having a spoken conversation. When a question needs facts, look them up: use search_wikipedia for people, places, events, and topics, and get_weather when asked about current weather, working out the latitude and longitude yourself from the place name. Answer from what comes back as if the knowledge is your own; never mention searching, sources, or tools. Keep replies to one or two sentences and lead with the answer. If a lookup returns nothing useful, say you don't know. No exclamation marks.",
+
+  "greeting": "Hey, ask me anything and I can look it up as we talk.",
+
+  "voice": { "voice_id": "anna" },
+
+  "tools": [
+    {
+      "name": "search_wikipedia",
+      // The model reads this to decide when to call it. Be specific about
+      // when to use it, not just what it does.
+      "description": "Search Wikipedia for people, places, events, or topics. Returns matching titles and summaries.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "search": { "type": "string", "description": "The topic to look up, a few words." }
+        },
+        "required": ["search"]
+      },
+      // "hold" keeps the caller with the agent while the request runs;
+      // "interactive" lets the conversation carry on around it.
+      "execution_mode": "hold",
+      "timeout_seconds": 15,
+      "http": {
+        // Anything already in the URL stays; the tool's arguments are added
+        // to the query string on top.
+        "url": "https://en.wikipedia.org/w/api.php?action=opensearch&format=json&limit=3",
+        "http_method": "GET",
+        // Header values are encrypted at rest and never read back. Put real
+        // credentials in .env and reference them as ${VARS}.
+        "headers": [
+          {
+            "name": "User-Agent",
+            "value": "AssemblyAI-Voice-Agent-Starter/1.0 (https://www.assemblyai.com)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "get_weather",
+      "description": "Get current weather for a location by coordinates. Derive latitude and longitude from the place name yourself.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "latitude": { "type": "number", "description": "Latitude in decimal degrees." },
+          "longitude": { "type": "number", "description": "Longitude in decimal degrees." }
+        },
+        "required": ["latitude", "longitude"]
+      },
+      "execution_mode": "hold",
+      "timeout_seconds": 15,
+      "http": {
+        "url": "https://api.open-meteo.com/v1/forecast?current=temperature_2m,weather_code,wind_speed_10m",
+        "http_method": "GET"
+      }
+    }
+  ]
+}
