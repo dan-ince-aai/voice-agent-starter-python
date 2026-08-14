@@ -14,8 +14,8 @@ services:
       # Which agents/<name>.jsonc the service publishes on boot.
       - key: AGENT
         value: minimal
-      # Paste the AGENT_ID from your .env here to connect to an agent you have
-      # already published. Left empty, the service publishes AGENT itself and
-      # reuses the agent of the same name on later restarts.
+      # Paste an id from your .env here to serve that exact agent. Left empty,
+      # the service publishes AGENT itself and reuses the agent of the same
+      # name on later restarts.
       - key: AGENT_ID
         value: ''

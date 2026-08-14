@@ -17,7 +17,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from lib import ApiError, aai, load_env, publish_agent, read_agent, required, twilio  # noqa: E402
+from lib import (ApiError, aai, load_env, publish_agent, read_agent,  # noqa: E402
+                 required, stored_agent_id, twilio)
 
 TRUNKING = "https://trunking.twilio.com/v1/Trunks"
 # Where Twilio sends the call. A fixed AssemblyAI address, not something to
@@ -40,15 +41,15 @@ def main() -> None:
 
     core = f"https://api.twilio.com/2010-04-01/Accounts/{account}"
 
-    # 1. The agent. AGENT_ID means one already exists; otherwise publish the
-    # file now, which also writes the new id to .env.
-    agent_id = os.environ.get("AGENT_ID")
+    # 1. The agent. A published id means one already exists; otherwise publish
+    # the file now, which also writes the new id to .env.
+    name = os.environ.get("AGENT", "minimal")
+    agent_id = stored_agent_id(name)
     if agent_id:
-        print(f"Agent: {agent_id} (from AGENT_ID)")
+        print(f"Agent: {agent_id} (already published)")
     else:
-        name = os.environ.get("AGENT", "minimal")
         agent = read_agent(name)
-        agent_id = publish_agent(agent)["id"]
+        agent_id = publish_agent(agent, name=name)["id"]
         print(f'Agent: {agent_id}, published "{agent["name"]}" from agents/{name}.jsonc')
 
     # 2. The number has to be one you already bought in Twilio.

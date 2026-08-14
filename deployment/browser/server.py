@@ -16,22 +16,23 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1]))
 
-from lib import ApiError, aai, load_env, publish_agent, read_agent, required  # noqa: E402
+from lib import (ApiError, aai, load_env, publish_agent, read_agent,  # noqa: E402
+                 required, stored_agent_id)
 
 
 def resolve_agent() -> dict:
-    """AGENT_ID set means the agent is managed elsewhere, so use it as it is."""
-    agent_id = os.environ.get("AGENT_ID")
-    if agent_id:
-        try:
-            agent = aai(f"/agents/{agent_id}")
-        except ApiError as err:
-            sys.exit(f"Could not load AGENT_ID {agent_id}: {err}")
-        return {"id": agent_id, "name": agent.get("name") or "Your agent"}
+    """A published id means the agent is managed elsewhere, so use it as it is."""
     name = os.environ.get("AGENT", "minimal")
+    known = stored_agent_id(name)
+    if known:
+        try:
+            agent = aai(f"/agents/{known}")
+        except ApiError as err:
+            sys.exit(f"Could not load agent {known}: {err}")
+        return {"id": known, "name": agent.get("name") or "Your agent"}
     agent = read_agent(name)
     try:
-        result = publish_agent(agent, reuse_by_name=True)
+        result = publish_agent(agent, name=name, reuse_by_name=True)
     except ApiError as err:
         sys.exit(f"Could not publish agents/{name}.jsonc: {err}")
     verb = "Created" if result["created"] else "Updated"

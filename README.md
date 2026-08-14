@@ -42,7 +42,15 @@ python publish.py                       # agents/minimal.jsonc
 # AGENT=http-tools python publish.py    # or any other file in agents/
 ```
 
-Writes `AGENT_ID` back to `.env`. Later runs update that agent instead of creating another.
+Writes `AGENT_ID_MINIMAL` back to `.env`. Later runs update that agent instead of creating another, and each file keeps its own agent, so switching with `AGENT=` never overwrites the last one.
+
+Already have an agent, from the playground or the dashboard? Pull it in instead:
+
+```sh
+python import_agent.py <agent-id>
+```
+
+That writes `agents/<its-name>.jsonc` from the live agent and records its id, so publishing later updates that same agent.
 
 ### 4. Talk to it
 
@@ -114,7 +122,7 @@ Render reads [render.yaml](render.yaml) and prompts for exactly one value, `ASSE
 | --- | --- | --- |
 | `ASSEMBLYAI_API_KEY` | prompted | Stays on the server. Never sent to the page. |
 | `AGENT` | `minimal` | Which `agents/<name>.jsonc` the service publishes when it boots. |
-| `AGENT_ID` | empty | Paste the id from your `.env` to connect to an agent you already published. |
+| `AGENT_ID` | empty | Paste an id from your `.env` to serve that exact agent, whichever file it came from. |
 
 Leaving `AGENT_ID` empty is fine. The service publishes `AGENT` on boot, and on later restarts it updates the agent of that name rather than creating another one.
 
@@ -125,12 +133,12 @@ agents/exa-search.jsonc     body of POST /v1/agents
         + .env              the ${VARS} it references
            │
            ▼  python publish.py
-        AGENT_ID
+      AGENT_ID_EXA_SEARCH
            ├──  browser/server.py      browser tab
            └──  telephony/connect.py   phone number
 ```
 
-The first publish sends `POST /v1/agents` and stores the returned ID in `.env`. With `AGENT_ID` set, later publishes send `PUT /v1/agents/{id}`, so the browser tab and the phone number both pick up the change on the next call.
+The first publish sends `POST /v1/agents` and stores the returned ID in `.env` under a key of its own, `AGENT_ID_EXA_SEARCH` for that file. Later publishes send `PUT /v1/agents/{id}`, so the browser tab and the phone number both pick up the change on the next call, and publishing a different file leaves this one alone. A bare `AGENT_ID` overrides every per-file key.
 
 Values written as `${VAR}` anywhere in an agent file are substituted at publish time from `.env`, or from `agents/<name>.env` for credentials only one agent uses. Both files are gitignored, so the JSON can be committed.
 

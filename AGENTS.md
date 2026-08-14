@@ -6,6 +6,7 @@ A standard-library Python starter for the AssemblyAI Voice Agent API. An agent i
 agents/<name>.jsonc        the agent, as the body of POST /v1/agents
 lib.py                     env loading, JSONC parsing, AssemblyAI + Twilio calls
 publish.py                 python publish.py
+import_agent.py            python import_agent.py <id>, playground agent into a file
 deployment/browser/        server.py, serves a page and mints session tokens
 deployment/telephony/      connect.py, Twilio SIP trunk and number binding
 ```
@@ -26,9 +27,9 @@ Agent files are API request bodies. If a field isn't in the [create-agent refere
 
 `${VAR}` in an agent file is substituted from the environment, the root `.env`, or `agents/<name>.env`, in that order of precedence. Secrets never live in the JSON, and an unresolved variable stops the publish with a message naming it.
 
-`AGENT_ID` decides create versus update. Unset, `publish_agent` sends `POST /v1/agents` and writes the returned id to `.env`. Set, it sends `PUT /v1/agents/{id}`, falling back to a create if that returns 404.
+Each agent file owns an id, stored as `AGENT_ID_<NAME>`: `agents/http-tools.jsonc` uses `AGENT_ID_HTTP_TOOLS`. Unset, `publish_agent` sends `POST /v1/agents` and writes the returned id under that key. Set, it sends `PUT /v1/agents/{id}`, falling back to a create if that returns 404. A bare `AGENT_ID` overrides every per-file key and is never written to.
 
-Both deployments read the same `AGENT_ID`. The browser session sends only `{ agent_id }` and the phone number is bound to the same id, which is why behaviour changes belong in the agent file rather than in a deployment.
+Both deployments resolve an id the same way, through `stored_agent_id(name)`. The browser session sends only `{ agent_id }` and the phone number is bound to the same id, which is why behaviour changes belong in the agent file rather than in a deployment.
 
 ## Rules
 

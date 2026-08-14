@@ -1,6 +1,6 @@
 # deployment/
 
-Where the agent answers. Both read the same `AGENT_ID`, so one published agent serves both.
+Where the agent answers. Both resolve the same id for a given `AGENT`, so one published agent serves both.
 
 | | | |
 | --- | --- | --- |

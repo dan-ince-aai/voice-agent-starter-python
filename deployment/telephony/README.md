@@ -6,7 +6,7 @@ Attaches your agent to a phone number you own in Twilio. Twilio passes inbound c
 
 ```sh
 git clone https://github.com/dan-ince-aai/voice-agent-starter-python
-cd voice-agent-starter
+cd voice-agent-starter-js
 ```
 
 ## 2. Add credentials
@@ -48,7 +48,7 @@ Call the number.
 
 ## What it did
 
-1. Published the agent, or used `AGENT_ID` if one was already set.
+1. Published the agent, or used its id from `.env` if it was already published.
 2. Created a SIP trunk on your domain.
 3. Set its origination URL to `sip:sip.assemblyai.com`.
 4. Attached your number to the trunk.

@@ -207,21 +207,34 @@ def aai(path: str, method: str = "GET", body: Any = None, headers: Optional[dict
         return {}
 
 
-def publish_agent(agent: dict, reuse_by_name: bool = False) -> dict:
-    """AGENT_ID decides create versus update. Unset, POST a new agent and
-    remember the id. Set, PUT the file over that agent."""
-    agent_id = os.environ.get("AGENT_ID")
+def agent_id_key(name: str) -> str:
+    return "AGENT_ID_" + re.sub(r"[^A-Z0-9]", "_", name.upper())
+
+
+def stored_agent_id(name: str) -> str:
+    """Each agent file gets its own id, so switching files does not overwrite
+    the agent the last one published. A bare AGENT_ID overrides them all, for
+    an agent shaped in the dashboard or a hosted deploy."""
+    return os.environ.get("AGENT_ID") or os.environ.get(agent_id_key(name), "")
+
+
+def publish_agent(agent: dict, name: str = "", reuse_by_name: bool = False) -> dict:
+    """An id in the environment decides create versus update. Absent, POST a
+    new agent and remember the id. Present, PUT the file over that agent."""
+    key = agent_id_key(name)
+    explicit = bool(os.environ.get("AGENT_ID"))
+    agent_id = stored_agent_id(name)
     if agent_id:
         try:
             current = aai(f"/agents/{agent_id}")
             if current.get("name") and current["name"] != agent.get("name"):
                 print(f'Note: agent {agent_id} was "{current["name"]}"')
             aai(f"/agents/{agent_id}", method="PUT", body=agent)
-            return {"id": agent_id, "created": False, "saved": True}
+            return {"id": agent_id, "created": False, "saved": True, "key": key}
         except ApiError as err:
             if err.status != 404:
                 raise
-            print(f"AGENT_ID {agent_id} no longer exists, creating a new agent")
+            print(f"Agent {agent_id} no longer exists, creating a new one")
     # A hosted server has no AGENT_ID and no writable .env, so without this it
     # would POST another agent on every restart.
     if reuse_by_name:
@@ -232,9 +245,11 @@ def publish_agent(agent: dict, reuse_by_name: bool = False) -> dict:
         if existing:
             aai(f"/agents/{existing['id']}", method="PUT", body=agent)
             return {"id": existing["id"], "created": False,
-                    "saved": save_env("AGENT_ID", existing["id"])}
+                    "saved": save_env(key, existing["id"]), "key": key}
     created = aai("/agents", method="POST", body=agent)
-    return {"id": created["id"], "created": True, "saved": save_env("AGENT_ID", created["id"])}
+    # An explicit AGENT_ID is the caller's choice, so it is not overwritten.
+    saved = False if explicit else save_env(key, created["id"])
+    return {"id": created["id"], "created": True, "saved": saved, "key": key}
 
 
 # --- Twilio -----------------------------------------------------------------

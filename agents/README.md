@@ -11,6 +11,14 @@ cp http-tools.jsonc my-agent.jsonc
 AGENT=my-agent python publish.py
 ```
 
+Or start from an agent that already exists on your account, which is the path from the playground into code:
+
+```sh
+python import_agent.py <agent-id>
+```
+
+Credentials are write-only on the API, so tool header values and LLM keys do not come back with it. The import says which ones to put back.
+
 For credentials, write `${MY_KEY}` anywhere in the file and put the value in `.env`, or in `agents/my-agent.env` if only this agent uses it. Both are gitignored. If a variable is missing, publishing stops and names it.
 
 ```jsonc
