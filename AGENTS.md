@@ -34,13 +34,13 @@ Both deployments read the same `AGENT_ID`. The browser session sends only `{ age
 
 - Standard library only. No pip install, no virtualenv, no requirements to keep current.
 - Behaviour goes in `agents/*.jsonc`. Runtime changes go in the deployment that owns them. Anything shared goes in `lib.py`, the only module both deployments import.
-- `deployment/browser/app.js` is copied from the [JavaScript starter](https://github.com/dan-ince-aai/voice-agent-starter) and should stay identical to it. Audio and transcript fixes belong there first, then here.
+- `deployment/browser/app.js` is copied from the [JS starter](https://github.com/dan-ince-aai/voice-agent-starter) and should stay identical to it. Audio and transcript fixes belong there first, then here.
 - Prefer `http` tools. Client-executed tools can't be answered on a phone call, and `publish.py` warns about them.
 - Voices: only IDs from the documented catalog at https://www.assemblyai.com/docs/voice-agents/voice-agent-api/voices. Never invent one.
 - Never move the API key into client code, commit it, or log it. `.env` and `agents/*.env` are gitignored; keep them that way.
 - Only use documented endpoints, and keep the doc links in the agent files accurate, since they are how anyone reading the repo finds the reference.
 - Voice-first prompt style: short spoken sentences, no visual formatting, no exclamation marks.
-- New agent file: name it after the parameter or integration it demonstrates, not the persona. Comment every non-obvious field with a link to the page that defines it, and add a row to `README.md` and `agents/README.md`. Add it to the JavaScript starter too, so the two stay in step.
+- New agent file: name it after the parameter or integration it demonstrates, not the persona. Comment every non-obvious field with a link to the page that defines it, and add a row to `README.md` and `agents/README.md`. Add it to the JS starter too, so the two stay in step.
 
 ## Reference
 

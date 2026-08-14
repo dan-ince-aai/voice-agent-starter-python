@@ -14,7 +14,7 @@ Voice agents defined as JSON files. Publish one to your AssemblyAI account, then
 
 Each file in [agents/](agents/) is the request body for `POST /v1/agents`. The starter sends it unchanged, saves the agent ID it gets back to `.env`, and both deployments connect using that ID. Built on the [AssemblyAI Voice Agent API](https://www.assemblyai.com/products/voice-agent-api). Python 3.9 or later, standard library only, so there is nothing to pip install.
 
-There is a [JavaScript version of this repo](https://github.com/dan-ince-aai/voice-agent-starter) with the same agents and the same steps.
+There is a [JS version of this repo](https://github.com/dan-ince-aai/voice-agent-starter) with the same agents and the same steps.
 
 ## Quickstart
 
