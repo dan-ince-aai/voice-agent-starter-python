@@ -14,14 +14,14 @@ Voice agents defined as JSON files. Publish one to your AssemblyAI account, then
 
 Each file in [agents/](agents/) is the request body for `POST /v1/agents`. The starter sends it unchanged, saves the agent ID it gets back to `.env`, and both deployments connect using that ID. An agent you already have goes the other way, `python import_agent.py <agent-id>` turns it into one of these files. Built on the [AssemblyAI Voice Agent API](https://www.assemblyai.com/products/voice-agent-api). Python 3.9 or later, standard library only, so there is nothing to pip install.
 
-There is a [JS version of this repo](https://github.com/dan-ince-aai/voice-agent-starter-js) with the same agents and the same steps.
+There is a [JS version of this repo](https://github.com/AssemblyAI/voice-agent-starter-js) with the same agents and the same steps.
 
 ## Quickstart
 
 ### 1. Clone
 
 ```sh
-git clone https://github.com/dan-ince-aai/voice-agent-starter-python
+git clone https://github.com/AssemblyAI/voice-agent-starter-python
 cd voice-agent-starter-python
 cp .env.example .env
 ```
@@ -133,7 +133,7 @@ Twilio passes the call to AssemblyAI over SIP, so nothing in this repo sits in t
 
 ## Hosting the browser app
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/dan-ince-aai/voice-agent-starter-python)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/AssemblyAI/voice-agent-starter-python)
 
 Render reads [render.yaml](render.yaml) and prompts for exactly one value, `ASSEMBLYAI_API_KEY`, because that is the only variable marked `sync: false`. It sets `PORT` itself. The other two arrive with defaults you can change under Environment on the service:
 

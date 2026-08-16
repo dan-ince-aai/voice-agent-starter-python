@@ -35,7 +35,7 @@ Both deployments resolve an id the same way, through `stored_agent_id(name)`. Th
 
 - Standard library only. No pip install, no virtualenv, no requirements to keep current.
 - Behaviour goes in `agents/*.jsonc`. Runtime changes go in the deployment that owns them. Anything shared goes in `lib.py`, the only module both deployments import.
-- `deployment/browser/app.js` is copied from the [JS starter](https://github.com/dan-ince-aai/voice-agent-starter-js) and should stay identical to it. Audio and transcript fixes belong there first, then here.
+- `deployment/browser/app.js` is copied from the [JS starter](https://github.com/AssemblyAI/voice-agent-starter-js) and should stay identical to it. Audio and transcript fixes belong there first, then here.
 - Prefer `http` tools. Client-executed tools can't be answered on a phone call, and `publish.py` warns about them.
 - Voices: only IDs from the documented catalog at https://www.assemblyai.com/docs/voice-agents/voice-agent-api/voices. Never invent one.
 - Never move the API key into client code, commit it, or log it. `.env` and `agents/*.env` are gitignored; keep them that way.
